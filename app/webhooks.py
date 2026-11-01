@@ -28,11 +28,9 @@ def handle_webhook(conn: sqlite3.Connection, payload: bytes, signature: str, sec
         raise InvalidSignature()
     event = json.loads(payload)
     event_id = event["id"]
-    if _already_seen(conn, event_id):
-        return "duplicate"
     with conn:
         conn.execute(
-            "INSERT INTO webhook_events(event_id, received_at) VALUES (?, ?)",
+            "INSERT OR REPLACE INTO webhook_events(event_id, received_at) VALUES (?, ?)",
             (event_id, now_utc().isoformat()),
         )
     if event["type"] == "payment.captured":

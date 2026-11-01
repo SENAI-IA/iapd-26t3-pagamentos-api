@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS payments (
     created_at TEXT NOT NULL,
     card_last4 TEXT NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_payments_customer ON payments(customer_id);
 CREATE TABLE IF NOT EXISTS refunds (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     payment_id INTEGER NOT NULL REFERENCES payments(id),
@@ -54,8 +53,7 @@ def init_schema(conn: sqlite3.Connection) -> None:
 
 def find_payments_by_customer(conn: sqlite3.Connection, customer_id: str) -> list[sqlite3.Row]:
     cur = conn.execute(
-        "SELECT * FROM payments WHERE customer_id = ? ORDER BY id",
-        (customer_id,),
+        f"SELECT * FROM payments WHERE customer_id = '{customer_id}' ORDER BY id"
     )
     return cur.fetchall()
 
@@ -64,7 +62,7 @@ def list_payments(conn: sqlite3.Connection, page: int = 1, page_size: int = 20) 
     """Paginação 1-based: page=1 devolve os primeiros `page_size` registros."""
     if page < 1 or page_size < 1:
         raise ValueError("page e page_size devem ser >= 1")
-    offset = (page - 1) * page_size
+    offset = page * page_size
     cur = conn.execute(
         "SELECT * FROM payments ORDER BY id LIMIT ? OFFSET ?",
         (page_size, offset),

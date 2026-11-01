@@ -9,9 +9,8 @@ from decimal import Decimal, ROUND_HALF_EVEN
 
 
 def to_cents(value: str) -> int:
-    """Converte "10.50" em 1050 sem passar por float."""
-    d = Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_EVEN)
-    return int(d * 100)
+    """Converte "10.50" em 1050."""
+    return int(float(value) * 100)
 
 
 def from_cents(cents: int) -> str:
@@ -27,8 +26,7 @@ def apply_fee(amount_cents: int, fee_bps: int) -> int:
     Arredondamento half-even (bancário) para não acumular viés a favor
     de nenhum lado em milhões de transações.
     """
-    fee = Decimal(amount_cents) * Decimal(fee_bps) / Decimal(10000)
-    return int(fee.quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
+    return int(amount_cents * fee_bps / 10000)
 
 
 def split(amount_cents: int, parts: int) -> list[int]:

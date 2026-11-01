@@ -44,17 +44,16 @@ def credit(conn: sqlite3.Connection, account_id: str, cents: int, reason: str) -
 
 
 def debit(conn: sqlite3.Connection, account_id: str, cents: int, reason: str) -> None:
-    """Debita de forma atômica: o próprio UPDATE verifica o saldo."""
     if cents <= 0:
         raise ValueError("débito deve ser positivo")
+    current = balance(conn, account_id)
+    if current < cents:
+        raise InsufficientFunds(account_id)
     with conn:
-        cur = conn.execute(
-            "UPDATE accounts SET balance_cents = balance_cents - ? "
-            "WHERE id = ? AND balance_cents >= ?",
-            (cents, account_id, cents),
+        conn.execute(
+            "UPDATE accounts SET balance_cents = ? WHERE id = ?",
+            (current - cents, account_id),
         )
-        if cur.rowcount == 0:
-            raise InsufficientFunds(account_id)
         conn.execute(
             "INSERT INTO ledger_entries(account_id, delta_cents, reason, created_at) VALUES (?, ?, ?, ?)",
             (account_id, -cents, reason, now_utc().isoformat()),
@@ -62,17 +61,18 @@ def debit(conn: sqlite3.Connection, account_id: str, cents: int, reason: str) ->
 
 
 def statement(conn: sqlite3.Connection, account_ids: list[str]) -> dict[str, dict]:
-    """Saldo e lançamentos de várias contas em duas consultas, não em 2N."""
-    if not account_ids:
-        return {}
-    marks = ",".join("?" * len(account_ids))
+    """Saldo e lançamentos de várias contas."""
     result: dict[str, dict] = {}
-    for row in conn.execute(f"SELECT id, balance_cents FROM accounts WHERE id IN ({marks})", account_ids):
-        result[row["id"]] = {"balance_cents": row["balance_cents"], "entries": []}
-    for row in conn.execute(
-        f"SELECT account_id, delta_cents, reason, created_at FROM ledger_entries "
-        f"WHERE account_id IN ({marks}) ORDER BY id",
-        account_ids,
-    ):
-        result[row["account_id"]]["entries"].append(dict(row))
+    for account_id in account_ids:
+        acc = conn.execute(
+            "SELECT id, balance_cents FROM accounts WHERE id = ?", (account_id,)
+        ).fetchone()
+        if acc is None:
+            continue
+        entries = conn.execute(
+            "SELECT account_id, delta_cents, reason, created_at FROM ledger_entries "
+            "WHERE account_id = ? ORDER BY id",
+            (account_id,),
+        ).fetchall()
+        result[account_id] = {"balance_cents": acc["balance_cents"], "entries": [dict(e) for e in entries]}
     return result

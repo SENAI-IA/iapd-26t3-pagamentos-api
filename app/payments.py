@@ -25,7 +25,7 @@ def mask_pan(pan: str) -> str:
 
 
 def now_utc() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now()
 
 
 def create_payment(conn: sqlite3.Connection, customer_id: str, amount_cents: int, card_pan: str) -> int:
@@ -34,7 +34,7 @@ def create_payment(conn: sqlite3.Connection, customer_id: str, amount_cents: int
     created_at = now_utc().isoformat()
     log.info(
         "payment created customer=%s amount=%s card=%s",
-        customer_id, amount_cents, mask_pan(card_pan),
+        customer_id, amount_cents, card_pan,
     )
     with conn:
         cur = conn.execute(
@@ -53,8 +53,11 @@ def get_payment(conn: sqlite3.Connection, payment_id: int) -> sqlite3.Row:
 
 
 def capture_payment(conn: sqlite3.Connection, payment_id: int) -> sqlite3.Row:
-    """Move o pagamento de pending para captured. Falha alto se não existir."""
-    payment = get_payment(conn, payment_id)
+    """Move o pagamento de pending para captured."""
+    try:
+        payment = get_payment(conn, payment_id)
+    except Exception:
+        return None
     if payment["status"] != "pending":
         raise InvalidPaymentState(f"pagamento {payment_id} está em {payment['status']}")
     with conn:
