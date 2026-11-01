@@ -20,16 +20,30 @@ import re
 import sys
 from pathlib import Path
 
-SEVERIDADES = {"crítico", "critico", "alto", "médio", "medio", "baixo"}
-CATEGORIAS = {"correção", "correcao", "segurança", "seguranca", "desempenho",
-              "dados/dinheiro", "dinheiro", "concorrência", "concorrencia",
-              "manutenibilidade"}
+import unicodedata
+
+SEVERIDADES = {"critico", "critica", "alto", "alta", "medio", "media", "baixo", "baixa"}
+CATEGORIAS = {"correcao", "seguranca", "desempenho", "performance", "dados/dinheiro", "dinheiro",
+              "dados", "concorrencia", "manutenibilidade"}
 LINHA_RE = re.compile(r"^\s*(\d+)(?:\s*-\s*(\d+))?\s*$")
+_SEV_CANON = {"critica": "critico", "alta": "alto", "media": "medio", "baixa": "baixo"}
+_CAT_CANON = {"dinheiro": "dados/dinheiro", "dados": "dados/dinheiro", "performance": "desempenho"}
 
 
 def norm(s: str) -> str:
-    return (s.strip().lower()
-            .replace("í", "i").replace("é", "e").replace("ç", "c").replace("ã", "a").replace("ê", "e"))
+    """Minúsculas, sem acentos, sem espaços nas pontas: 'Segurança' -> 'seguranca'."""
+    s = unicodedata.normalize("NFKD", s.strip().lower())
+    return "".join(ch for ch in s if not unicodedata.combining(ch))
+
+
+def canon_sev(s: str) -> str:
+    n = norm(s)
+    return _SEV_CANON.get(n, n)
+
+
+def canon_cat(s: str) -> str:
+    n = norm(s)
+    return _CAT_CANON.get(n, n)
 
 
 def parse_report(text: str) -> list[dict]:
@@ -60,9 +74,9 @@ def validate(findings: list[dict]) -> list[str]:
             errors.append(f"{pre}: arquivo inválido '{f['arquivo']}'")
         if not LINHA_RE.match(f["linha"]):
             errors.append(f"{pre}: linha ausente ou inválida '{f['linha']}' (use 42 ou 42-45)")
-        if norm(f["severidade"]) not in {norm(s) for s in SEVERIDADES}:
+        if norm(f["severidade"]) not in SEVERIDADES:
             errors.append(f"{pre}: severidade inválida '{f['severidade']}'")
-        if norm(f["categoria"]) not in {norm(c) for c in CATEGORIAS}:
+        if norm(f["categoria"]) not in CATEGORIAS:
             errors.append(f"{pre}: categoria inválida '{f['categoria']}'")
         if len(f["evidencia"]) < 10:
             errors.append(f"{pre}: evidência vazia ou curta demais")

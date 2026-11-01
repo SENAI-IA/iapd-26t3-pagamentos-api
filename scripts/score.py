@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from validate_report import LINHA_RE, norm, parse_report  # noqa: E402
+from validate_report import LINHA_RE, canon_sev, parse_report  # noqa: E402
 
 PONTOS = {"critico": 3, "alto": 2, "medio": 1, "baixo": 1}
 
@@ -62,7 +62,7 @@ def score(findings: list[dict], gabarito: list[dict], tol: int) -> dict:
     pontos = 0
     por_sev = {s: {"total": 0, "encontrados": 0} for s in PONTOS}
     for bug in gabarito:
-        sev = norm(bug["severidade"])
+        sev = canon_sev(bug["severidade"])
         por_sev[sev]["total"] += 1
         if bug["id"] in encontrados:
             por_sev[sev]["encontrados"] += 1
