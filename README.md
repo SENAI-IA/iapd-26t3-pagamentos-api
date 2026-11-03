@@ -1,6 +1,6 @@
 # pagamentos-api
 
-API de pagamentos de brinquedo usada no hands-on de code review da Turma S.D. (IA e Produtividade, Semana 3). Python 3.10+, só biblioteca padrão e `pytest`.
+API de pagamentos de brinquedo usada no hands-on de code review da turma IAPD-26T3 (IA Aplicada à Produtividade no Desenvolvimento, semana 3). Python 3.10+, só biblioteca padrão e `pytest`.
 
 ## Como rodar
 
