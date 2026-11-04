@@ -7,7 +7,7 @@ API de pagamentos de brinquedo usada no hands-on de code review da turma IAPD-26
 | Aula | Uso | Material |
 |---|---|---|
 | Aula 01 (Ter 03/11) | Atividade 1.1: escrever o steering do repo a partir deste README. Atividade 1.3 + Disputa 1: a skill v0 de code review revisa a branch `main` (14 bugs plantados) e o relatório é pontuado | [2026-11-03 - Aula 01 - Steering e skill](https://github.com/SENAI-IA/iapd-26t3-materiais/tree/main/2026-11-03-iapd-26t3-s03-aula-01-steering-e-skill) |
-| Aula 02 (Qua 04/11) | Atividade 2.2 + Disputa 2: a suíte `review-*` com agente revisor roda de novo sobre a `main`; compara-se recall e falsos positivos com a v0 | [2026-11-04 - Aula 02 - Multiplas skills](https://github.com/SENAI-IA/iapd-26t3-materiais/tree/main/2026-11-04-iapd-26t3-s03-aula-02-multiplas-skills) |
+| Aula 02 (Qua 04/11) | Disputa 2, o Duelo das Skills: a equipe adversária roda a skill `review-<tema>` da criadora sobre a `main` (bugs do tema: +3) e sobre a `clean` (qualquer achado: -2); o professor pontua com `scripts/score_duelo.py --tema <tema>` | [2026-11-04 - Aula 02 - Como se faz uma skill](https://github.com/SENAI-IA/iapd-26t3-materiais/tree/main/2026-11-04-iapd-26t3-s03-aula-02-como-se-faz-uma-skill) |
 | Aula 03 (Qui 05/11) | Torneio Red Team x Blue Team: cada equipe copia a branch `clean` para `iapd-26t3-eNN-torneio`, planta 5 bugs e o outro time caça com a própria suíte | [2026-11-05 - Aula 03 - Spec e o Torneio](https://github.com/SENAI-IA/iapd-26t3-materiais/tree/main/2026-11-05-iapd-26t3-s03-aula-03-spec-e-o-torneio) |
 
 Branches: `main` (com os bugs plantados, usada nas Disputas 1 e 2) e `clean` (sem bugs, base do Torneio). O gabarito dos bugs fica com o professor até o fim de cada disputa.
